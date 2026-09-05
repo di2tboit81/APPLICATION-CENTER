@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>PosPay Patching</title>
+<HTA:APPLICATION
+ ID="PosPayPatching"
+ APPLICATIONNAME="PosPay Patching"
+ ICON="pospay.ico"
+ BORDER="thin"
+ CAPTION="yes"
+ MAXIMIZEBUTTON="yes"
+ MINIMIZEBUTTON="yes"
+ SHOWINTASKBAR="yes"
+ SINGLEINSTANCE="yes"
+ SYSMENU="yes"
+ SCROLL="no"
+ WINDOWSTATE="maximized"
+/>
+
+<style>
+html,body{margin:0;padding:0;width:100%;height:100%;font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:#062c52;overflow:hidden}
+*{box-sizing:border-box}
+#screen{position:absolute;left:0;top:0;width:100%;height:100%;background:#062c52;overflow:hidden;}
+#bgImage{position:absolute;left:0;top:0;width:100%;height:100%;z-index:0;display:block;}
+.wrap{position:absolute;left:0;top:0;width:100%;height:100%;overflow:hidden;background:transparent;border:1px solid #8fb9df;border-radius:22px;z-index:1}
+
+/* orange decorative waves */
+.wrap:before{display:none}
+.wrap:after{display:none}
+
+.header{display:none}
+.logo{position:absolute;left:26px;top:12px;color:#ff9a18;font-size:30px;font-weight:bold}
+.titlebar{position:absolute;left:63px;top:16px;color:#fff;font-size:17px;font-weight:600}
+.min{position:absolute;right:100px;top:15px;color:#fff;font-size:20px}
+.max{position:absolute;right:55px;top:15px;width:17px;height:17px;border:2px solid #fff}
+.close{position:absolute;right:18px;top:8px;color:#fff;font-size:28px}
+
+.main{position:absolute;left:0;right:0;top:0;bottom:0;z-index:2}
+.brandGear{position:absolute;left:50%;top:8px;transform:translateX(-50%);color:#ff9b00;font-size:48px;line-height:48px;text-align:center}
+.kicker{display:none}
+h1{position:absolute;left:0;right:0;top:48px;margin:0;color:#fff;font-size:31px;line-height:36px;font-weight:900;text-align:center}
+h1 span{color:#ff861f}
+.desc{position:absolute;left:0;right:0;top:84px;margin:0;color:#dce9f5;font-size:12px;text-align:center}
+.version{position:absolute;left:38px;bottom:145px;width:auto;height:auto;min-width:0;border:2px solid #ff861f;border-radius:999px;color:#fff;text-align:center;font-size:10px;padding:9px 16px;line-height:16px;white-space:nowrap;background:rgba(6,44,82,.82);z-index:4;box-shadow:0 4px 14px rgba(0,0,0,.22)}.version b{font-size:12px;color:#ff861f}.version span{font-size:9px;color:#dce9f5}
+
+.card{border-radius:16px;position:absolute;left:50%;top:140px;width:560px;height:340px;margin-left:-280px;background:#fff;border-radius:22px;box-shadow:0 10px 28px rgba(0,0,0,.28);border:1px solid #d9e4ee}
+.flow{position:absolute;left:50%;top:24px;width:340px;height:115px;margin-left:-170px}
+.doc{position:absolute;top:0;width:61px;height:80px;border:4px solid #12395e;border-radius:10px;background:#fff}
+.doc.left{left:30px}.doc.right{right:30px}
+.fold{position:absolute;right:-4px;top:-4px;width:21px;height:21px;background:#fff;border-left:4px solid #12395e;border-bottom:4px solid #12395e}
+.lines{position:absolute;left:10px;top:27px;width:39px}
+.lines i{display:block;height:4px;background:#12395e;margin-bottom:7px}
+.badge{position:absolute;right:-16px;bottom:-13px;width:34px;height:34px;border-radius:50%;color:#fff;text-align:center;line-height:34px;font-size:18px;font-weight:bold}
+.red{background:#f14b43}.green{background:#2db878}
+.arrows{position:absolute;left:133px;top:26px;color:#ff7a18;font-size:37px;font-weight:900;letter-spacing:-10px}
+.heroTitle{position:absolute;left:0;right:0;top:138px;text-align:center;color:#092e54;font-size:22px;font-weight:900}
+.heroSub{position:absolute;left:0;right:0;top:166px;text-align:center;color:#58708b;font-size:11px}
+.patch{border-radius:18px;position:absolute;left:50%;top:205px;width:270px;height:47px;margin-left:-135px;border:0;border-radius:16px;background:#062e55;color:#fff;font-size:19px;font-weight:900;cursor:pointer}
+.patch:hover{background:#0b416f}
+.patch:disabled{background:#7c8b99;cursor:default}
+.file{display:none}
+#sourcePath,#targetPath,#statusText,#statusDot,#fileName{display:none}
+.folder{border-radius:14px;display:none;position:absolute;left:50%;top:258px;width:210px;height:32px;margin-left:-105px;border:0;border-radius:10px;background:#ff6a00;color:#fff;font-weight:bold}
+.folder.show{display:block}.message{display:none;position:absolute;left:50%;top:294px;width:470px;margin-left:-235px;padding:6px;text-align:center;border-radius:14px;font-size:9px;font-weight:bold}
+.message-success{display:none;background:#eaf8f0;color:#17633f}.message-warn{display:block;background:#fff4e7;color:#89531a}.message-error{display:block;background:#fff0f0;color:#a12f2f}
+
+
+.log{border-radius:22px;position:absolute;left:23px;right:23px;bottom:16px;height:120px;background:#f7fbff;border:1px solid #b8d5ee;border-radius:22px;padding:0}
+.logTitle{position:absolute;left:14px;top:10px;color:#12395e;font-size:12px;font-weight:900}
+.clear{border-radius:14px;position:absolute;right:10px;top:7px;height:27px;padding:0 10px;border:1px solid #b8d5ee;border-radius:12px;background:#fff;color:#173b5f;font-size:9px;font-weight:bold;cursor:pointer}
+.logArea{border-radius:12px;position:absolute;left:10px;right:10px;top:37px;bottom:9px;border:1px solid #c9ddec;border-radius:16px;background:#fff;overflow:auto;padding:5px;font:9px Consolas,monospace;color:#294766;white-space:pre-wrap}
+
+/* ===== PEMILIHAN FILE PATCH ===== */
+#filePicker{
+    display:none;
+    position:absolute;
+    left:12px;
+    right:12px;
+    top:8px;
+    height:324px;
+    background:#fff;
+    border:1px solid #d9e4ee;
+    border-radius:18px;
+    box-shadow:0 8px 22px rgba(0,0,0,.18);
+    z-index:50;
+    overflow:hidden;
+}
+.pickerTitle{
+    height:30px;
+    padding:8px 12px;
+    color:#092e54;
+    font-size:13px;
+    font-weight:900;
+    border-bottom:1px solid #d9e4ee;
+}
+.pickerSub{
+    height:20px;
+    line-height:20px;
+    padding:0 12px;
+    color:#58708b;
+    font-size:8px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+#fileList{
+    position:absolute;
+    left:9px;
+    right:9px;
+    top:61px;
+    bottom:48px;
+    overflow:auto;
+    border:1px solid #c9ddec;
+    border-radius:11px;
+    background:#f8fbfe;
+    padding:4px;
+    white-space:nowrap;
+}
+.fileColumn{
+    display:inline-block;
+    vertical-align:top;
+    width:48%;
+    box-sizing:border-box;
+    padding:0 3px;
+}
+.fileRow{
+    display:block;
+    position:relative;
+    height:23px;
+    line-height:23px;
+    margin:1px 0;
+    padding:0 7px;
+    background:#fff;
+    border:1px solid #e1ebf3;
+    border-radius:7px;
+    cursor:pointer;
+    overflow:hidden;
+    box-sizing:border-box;
+}
+.fileRow:hover{background:#eef7ff}
+.fileRow input{
+    vertical-align:middle;
+    margin:0 6px 0 0;
+    width:13px;
+    height:13px;
+}
+.fileRowName{
+    display:inline-block;
+    vertical-align:middle;
+    width:calc(100% - 75px);
+    color:#173b5f;
+    font:9px Consolas,monospace;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+.fileRowSize{
+    position:absolute;
+    right:7px;
+    top:0;
+    width:60px;
+    text-align:right;
+    color:#71869a;
+    font-size:7px;
+}
+.fileEmpty{
+    padding:28px 10px;
+    text-align:center;
+    color:#71869a;
+    font-size:10px;
+}
+#pickerButtons{
+    position:absolute;
+    left:9px;
+    right:9px;
+    bottom:7px;
+    height:34px;
+    text-align:right;
+    white-space:nowrap;
+}
+.pickerBtn{
+    height:30px;
+    padding:0 9px;
+    margin-left:4px;
+    border:0;
+    border-radius:8px;
+    font-size:8px;
+    font-weight:800;
+    cursor:pointer;
+}
+.pickerSelect{background:#eaf3fb;color:#173b5f}
+.pickerCancel{background:#eef1f4;color:#4b6074}
+.pickerConfirm{background:#ff6a00;color:#fff}
+
+/* ===== KONFIRMASI PATCH ===== */
+#patchConfirm{
+    display:none;
+    position:absolute;
+    left:18px;
+    right:18px;
+    top:18px;
+    bottom:18px;
+    background:#fff;
+    border:1px solid #d9e4ee;
+    border-radius:16px;
+    box-shadow:0 10px 28px rgba(0,0,0,.28);
+    z-index:100;
+    overflow:hidden;
+}
+.confirmTitle{
+    height:34px;
+    line-height:34px;
+    padding:0 13px;
+    color:#092e54;
+    font-size:13px;
+    font-weight:900;
+    border-bottom:1px solid #d9e4ee;
+}
+.confirmSub{
+    padding:7px 13px 5px;
+    color:#58708b;
+    font-size:8px;
+    font-weight:700;
+}
+#confirmList{
+    position:absolute;
+    left:10px;
+    right:10px;
+    top:63px;
+    bottom:53px;
+    overflow:auto;
+    border:1px solid #c9ddec;
+    border-radius:10px;
+    background:#f8fbfe;
+    padding:5px;
+    white-space:nowrap;
+}
+.confirmColumn{
+    display:inline-block;
+    vertical-align:top;
+    width:48%;
+    padding:0 3px;
+    box-sizing:border-box;
+}
+.confirmRow{
+    height:23px;
+    line-height:23px;
+    margin:1px 0;
+    padding:0 7px;
+    background:#fff;
+    border:1px solid #e1ebf3;
+    border-radius:7px;
+    color:#173b5f;
+    font:9px Consolas,monospace;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
+.confirmNum{
+    display:inline-block;
+    width:24px;
+    color:#ff6a00;
+    font-weight:900;
+}
+#confirmExisting{
+    display:none;
+    position:absolute;
+    left:13px;
+    right:13px;
+    top:47px;
+    height:14px;
+    line-height:14px;
+    color:#b64b00;
+    font-size:8px;
+    font-weight:800;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
+#confirmButtons{
+    position:absolute;
+    left:10px;
+    right:10px;
+    bottom:9px;
+    height:34px;
+    text-align:right;
+    white-space:nowrap;
+}
+.confirmBtn{
+    height:30px;
+    min-width:82px;
+    padding:0 12px;
+    margin-left:5px;
+    border:0;
+    border-radius:8px;
+    font-size:9px;
+    font-weight:900;
+    cursor:pointer;
+}
+.confirmCancel{background:#eef1f4;color:#4b6074}
+.confirmOk{background:#ff6a00;color:#fff}
+
+</style>
+<script language="javascript">
+
+/* =========================================================
+   VARIABEL
+   ========================================================= */
+
+var fso = null;
+var shell = null;
+
+var appDir = "";
+var batPath = "";
+
+var sourceDir = "";
+var targetDir = "";
+var progressValue = 0;
+var selectedFiles = [];
+
+function forceMaximized(){
+    try {
+        window.moveTo(0,0);
+        window.resizeTo(screen.availWidth, screen.availHeight);
+    } catch(e) {}
+}
+
+function logLine(t) {
+    try {
+        var e = document.getElementById("logArea");
+        if (!e) return;
+        var d = new Date();
+        var hh = ("0" + d.getHours()).slice(-2);
+        var mm = ("0" + d.getMinutes()).slice(-2);
+        var ss = ("0" + d.getSeconds()).slice(-2);
+        e.innerText += "[" + hh + ":" + mm + ":" + ss + "] " + t + "\r\n";
+        e.scrollTop = e.scrollHeight;
+    } catch (x) {}
+}
+
+function setProgress(n) {
+    progressValue = n;
+}
+
+function clearLog() {
+    try {
+        document.getElementById("logArea").innerText = "";
+        setProgress(0);
+        logLine("Log dibersihkan.");
+    } catch (x) {}
+}
+
+
+
+/* =========================================================
+   MENCARI FOLDER INDEX.HTA
+   ========================================================= */
+
+function hideProgress() {
+}
+
+function showProgress() {
+}
+
+function getAppDir() {
+
+    var p =
+        unescape(window.location.pathname)
+        .replace(/\//g, "\\");
+
+    if (p.charAt(0) == "\\") {
+        p = p.substring(1);
+    }
+
+    var n = p.lastIndexOf("\\");
+
+    if (n >= 0) {
+        return p.substring(0, n);
+    }
+
+    return "";
+}
+
+
+/* =========================================================
+   MEMBACA VARIABLE DARI BAT
+   ========================================================= */
+
+function getVar(txt, name) {
+
+    var re =
+        new RegExp(
+            'set\\s+"' +
+            name +
+            '\\s*=\\s*([^"]*)"',
+            'i'
+        );
+
+    var m = txt.match(re);
+
+    if (m) {
+        return m[1].replace(
+            /^\s+|\s+$/g,
+            ""
+        );
+    }
+
+    return "";
+}
+
+
+/* =========================================================
+   MEMUAT KONFIGURASI
+   ========================================================= */
+
+function loadConfig() {
+
+    fso = new ActiveXObject("Scripting.FileSystemObject");
+    shell = new ActiveXObject("WScript.Shell");
+
+    appDir = getAppDir();
+
+    batPath = fso.BuildPath(appDir, "Download_Patching.bat");
+
+    if (!fso.FileExists(batPath)) {
+        throw new Error(
+            "Download_Patching.bat tidak ditemukan di folder yang sama dengan PosPay."
+        );
+    }
+
+    var ts = fso.OpenTextFile(batPath, 1, false);
+    var txt = ts.ReadAll();
+    ts.Close();
+
+    sourceDir = getVar(txt, "SOURCE_DIR");
+    targetDir = getVar(txt, "TARGET_DIR");
+
+    if (!sourceDir) {
+        throw new Error("SOURCE_DIR belum diatur di Download_Patching.bat.");
+    }
+
+    if (!targetDir) {
+        throw new Error("TARGET_DIR belum diatur di Download_Patching.bat.");
+    }
+
+    document.getElementById("fileName").innerText = sourceDir;
+    document.getElementById("sourcePath").innerText = sourceDir;
+    document.getElementById("targetPath").innerText = targetDir;
+
+    logLine("Konfigurasi berhasil dibaca.");
+    logLine("Folder sumber: " + sourceDir);
+    logLine("Folder tujuan: " + targetDir);
+}
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+function setStatus(t, good) {
+    try {
+        var textEl = document.getElementById("statusText");
+        if (textEl) textEl.innerText = t;
+    } catch (x) {}
+}
+
+
+/* =========================================================
+   PESAN
+   ========================================================= */
+
+function message(cls, t) {
+
+    var e =
+        document.getElementById(
+            "message"
+        );
+
+    if (!e) {
+        logLine(t);
+        return;
+    }
+
+    e.className = "message message-" + cls;
+    e.innerText = t;
+}
+
+
+/* =========================================================
+   PROSES PATCH
+   ========================================================= */
+
+function patchNow() {
+    openFilePicker();
+}
+
+function getFileChecks() {
+    var all = document.getElementsByTagName("input");
+    var result = [];
+    for (var i = 0; i < all.length; i++) {
+        if (all[i].className == "fileCheck") result.push(all[i]);
+    }
+    return result;
+}
+
+function openFilePicker() {
+
+    try {
+        loadConfig();
+
+        if (!fso.FolderExists(sourceDir)) {
+            setStatus("FOLDER SUMBER TIDAK DITEMUKAN", false);
+            message("error", "Folder sumber tidak ditemukan. Periksa SOURCE_DIR di BAT.");
+            logLine("GAGAL: folder sumber tidak ditemukan.");
+            return;
+        }
+
+        var list = document.getElementById("fileList");
+        if (!list) return;
+
+        list.innerHTML = "";
+        selectedFiles = [];
+
+        var folder = fso.GetFolder(sourceDir);
+        var en = new Enumerator(folder.Files);
+        var files = [];
+
+        for (; !en.atEnd(); en.moveNext()) {
+            files.push(en.item());
+        }
+
+        // Urutkan nama file agar tampil rapi.
+        files.sort(function(a, b) {
+            var aa = a.Name.toLowerCase();
+            var bb = b.Name.toLowerCase();
+            if (aa < bb) return -1;
+            if (aa > bb) return 1;
+            return 0;
+        });
+
+        var count = files.length;
+        var rowsPerColumn = 10;
+        var columnCount = Math.ceil(count / rowsPerColumn);
+
+        if (count === 0) {
+            var empty = document.createElement("div");
+            empty.className = "fileEmpty";
+            empty.innerText = "Tidak ada file di folder sumber.";
+            list.appendChild(empty);
+        } else {
+            for (var c = 0; c < columnCount; c++) {
+                var col = document.createElement("div");
+                col.className = "fileColumn";
+
+                var startIndex = c * rowsPerColumn;
+                var endIndex = Math.min(startIndex + rowsPerColumn, count);
+
+                for (var i = startIndex; i < endIndex; i++) {
+                    var file = files[i];
+                    var row = document.createElement("label");
+                    row.className = "fileRow";
+
+                    var cb = document.createElement("input");
+                    cb.type = "checkbox";
+                    cb.className = "fileCheck";
+                    cb.value = file.Name;
+
+                    var num = document.createElement("span");
+                    num.className = "fileRowNum";
+                    num.innerText = (i + 1) + ".";
+                    num.style.display = "inline-block";
+                    num.style.width = "25px";
+                    num.style.color = "#ff6a00";
+                    num.style.fontWeight = "900";
+                    num.style.fontSize = "8px";
+
+                    var name = document.createElement("span");
+                    name.className = "fileRowName";
+                    name.innerText = file.Name;
+
+                    var size = document.createElement("span");
+                    size.className = "fileRowSize";
+                    size.innerText = formatBytes(file.Size);
+
+                    row.appendChild(cb);
+                    row.appendChild(num);
+                    row.appendChild(name);
+                    row.appendChild(size);
+                    col.appendChild(row);
+                }
+
+                col.style.width = "48%";
+                list.appendChild(col);
+            }
+        }
+
+        document.getElementById("pickerFolder").innerText = "Folder sumber: " + sourceDir;
+        document.getElementById("filePicker").style.display = "block";
+        document.getElementById("btnPatch").style.display = "none";
+        document.getElementById("btnFolder").className = "folder";
+        message("warn", "Pilih satu atau beberapa file yang ingin di-patch.");
+        logLine("Daftar file sumber dibuka. Jumlah file: " + count);
+
+    } catch (e) {
+        setStatus("TERJADI KESALAHAN", false);
+        message("error", "Terjadi kesalahan: " + (e.message || e));
+        logLine("ERROR: " + (e.message || e));
+    }
+}
+
+function closeFilePicker() {
+    var picker = document.getElementById("filePicker");
+    if (picker) picker.style.display = "none";
+
+    var patchBtn = document.getElementById("btnPatch");
+    if (patchBtn) patchBtn.style.display = "block";
+
+    message("", "");
+}
+
+function selectAllFiles() {
+    var checks = getFileChecks();
+    for (var i = 0; i < checks.length; i++) {
+        checks[i].checked = true;
+    }
+    logLine("Semua file dipilih: " + checks.length + " file.");
+}
+
+function unselectAllFiles() {
+    var checks = getFileChecks();
+    for (var i = 0; i < checks.length; i++) {
+        checks[i].checked = false;
+    }
+    logLine("Semua pilihan file dibatalkan.");
+}
+
+function formatBytes(bytes) {
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+    if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + " MB";
+    return (bytes / 1073741824).toFixed(1) + " GB";
+}
+
+function confirmFileSelection() {
+
+    try {
+        var checks = getFileChecks();
+        selectedFiles = [];
+
+        for (var i = 0; i < checks.length; i++) {
+            if (checks[i].checked) {
+                selectedFiles.push(checks[i].value);
+            }
+        }
+
+        if (selectedFiles.length === 0) {
+            alert("Pilih minimal satu file untuk di-patch.");
+            return;
+        }
+
+        patchSelectedFiles();
+
+    } catch (e) {
+        setStatus("TERJADI KESALAHAN", false);
+        message("error", "Terjadi kesalahan: " + (e.message || e));
+        logLine("ERROR: " + (e.message || e));
+    }
+}
+
+
+function showPatchConfirm(valid, existing) {
+    var modal = document.getElementById("patchConfirm");
+    var list = document.getElementById("confirmList");
+    var existingBox = document.getElementById("confirmExisting");
+    if (!modal || !list) return;
+
+    list.innerHTML = "";
+
+    var rowsPerColumn = 10;
+    var columnCount = Math.ceil(valid.length / rowsPerColumn);
+
+    for (var c = 0; c < columnCount; c++) {
+        var col = document.createElement("div");
+        col.className = "confirmColumn";
+        col.style.width = "48%";
+
+        var startIndex = c * rowsPerColumn;
+        var endIndex = Math.min(startIndex + rowsPerColumn, valid.length);
+
+        for (var i = startIndex; i < endIndex; i++) {
+            var row = document.createElement("div");
+            row.className = "confirmRow";
+
+            var num = document.createElement("span");
+            num.className = "confirmNum";
+            num.innerText = (i + 1) + ".";
+
+            var txt = document.createElement("span");
+            txt.innerText = valid[i];
+
+            row.appendChild(num);
+            row.appendChild(txt);
+            col.appendChild(row);
+        }
+
+        list.appendChild(col);
+    }
+
+    existingBox.innerHTML = "";
+    if (existing.length > 0) {
+        existingBox.style.display = "block";
+        existingBox.innerText = "⚠ " + existing.length + " file sudah ada di folder tujuan dan akan ditimpa.";
+    } else {
+        existingBox.style.display = "none";
+    }
+
+    modal.style.display = "block";
+}
+
+function cancelPatchConfirm() {
+    var modal = document.getElementById("patchConfirm");
+    if (modal) modal.style.display = "none";
+
+    setStatus("PATCHING DIBATALKAN", false);
+    message("warn", "Patching dibatalkan. File lama tetap aman.");
+    logLine("Patching dibatalkan oleh pengguna.");
+}
+
+function acceptPatchConfirm() {
+    var modal = document.getElementById("patchConfirm");
+    if (modal) modal.style.display = "none";
+
+    continuePatchProcess();
+}
+
+function patchSelectedFiles() {
+
+    var patchBtn = document.getElementById("btnPatch");
+
+    try {
+        loadConfig();
+
+        if (!fso.FolderExists(sourceDir)) {
+            throw new Error("Folder sumber tidak ditemukan: " + sourceDir);
+        }
+
+        if (!fso.FolderExists(targetDir)) {
+            fso.CreateFolder(targetDir);
+        }
+
+        var existing = [];
+        var valid = [];
+
+        for (var i = 0; i < selectedFiles.length; i++) {
+            var name = selectedFiles[i];
+            var srcFile = fso.BuildPath(sourceDir, name);
+
+            if (!fso.FileExists(srcFile)) {
+                throw new Error("File sumber tidak ditemukan: " + name);
+            }
+
+            valid.push(name);
+
+            var destFile = fso.BuildPath(targetDir, name);
+            if (fso.FileExists(destFile)) {
+                existing.push(name);
+            }
+        }
+
+        pendingPatchFiles = valid;
+        pendingExistingFiles = existing;
+        showPatchConfirm(valid, existing);
+        return;
+    } catch (e) {
+        setStatus("TERJADI KESALAHAN", false);
+        message("error", "Terjadi kesalahan: " + (e.message || e));
+        logLine("ERROR: " + (e.message || e));
+    }
+}
+
+function continuePatchProcess() {
+    var patchBtn = document.getElementById("btnPatch");
+    var valid = pendingPatchFiles;
+    try {
+        if (patchBtn) patchBtn.disabled = true;
+
+        var picker = document.getElementById("filePicker");
+        if (picker) picker.style.display = "none";
+
+        setStatus("SEDANG MEMPROSES PATCH...", false);
+        setProgress(20);
+        message("warn", "Mohon tunggu, proses patch sedang berjalan...");
+
+        logLine("Memulai patch " + valid.length + " file.");
+        logLine("Folder sumber: " + sourceDir);
+        logLine("Folder tujuan: " + targetDir);
+
+        var args = "";
+        for (var a = 0; a < valid.length; a++) {
+            args += ' "' + valid[a].replace(/"/g, '""') + '"';
+            logLine("Dipilih: " + valid[a]);
+        }
+
+        setProgress(45);
+        logLine("Menjalankan Download_Patching.bat...");
+
+        var exitCode = shell.Run(
+            '"' + batPath + '"' + args,
+            1,
+            true
+        );
+
+        setProgress(80);
+        logLine("BAT selesai. Exit code: " + exitCode);
+
+        var failed = [];
+        for (var b = 0; b < valid.length; b++) {
+            var resultFile = fso.BuildPath(targetDir, valid[b]);
+            if (!fso.FileExists(resultFile)) {
+                failed.push(valid[b]);
+            } else {
+                logLine("BERHASIL: " + resultFile);
+            }
+        }
+
+        if (exitCode === 0 && failed.length === 0) {
+            setStatus("PATCHING BERHASIL", true);
+            message("success", "PATCH BERHASIL — semua file terpilih sudah berada di folder tujuan.");
+            setProgress(100);
+            logLine("PATCHING BERHASIL: " + valid.length + " file.");
+            var folderBtn = document.getElementById("btnFolder");
+            if (folderBtn) folderBtn.className = "folder show";
+        } else {
+            setStatus("PATCHING SEBAGIAN / GAGAL", false);
+
+            var failText = "Patch selesai tetapi ada file yang gagal.";
+            if (failed.length > 0) {
+                failText += "\nGagal: " + failed.join(", ");
+            }
+
+            message("error", failText);
+            setProgress(0);
+            logLine("GAGAL: " + (failed.length > 0 ? failed.join(", ") : "BAT mengembalikan error."));
+        }
+
+        if (patchBtn) patchBtn.disabled = false;
+        if (patchBtn) patchBtn.style.display = "block";
+
+    } catch (e) {
+        setStatus("TERJADI KESALAHAN", false);
+        message("error", "Terjadi kesalahan: " + (e.message || e));
+        setProgress(0);
+        logLine("ERROR: " + (e.message || e));
+
+        if (patchBtn) {
+            patchBtn.disabled = false;
+            patchBtn.style.display = "block";
+        }
+
+        var picker2 = document.getElementById("filePicker");
+        if (picker2) picker2.style.display = "block";
+    }
+}
+
+/* =========================================================
+   BUKA FOLDER
+   ========================================================= */
+
+function openFolder() {
+
+    try {
+        loadConfig();
+
+        if (!fso.FolderExists(targetDir)) {
+            throw new Error("Folder hasil patch tidak ditemukan: " + targetDir);
+        }
+
+        shell.Run(
+            'explorer.exe "' + targetDir + '"',
+            1,
+            false
+        );
+
+    } catch (e) {
+        alert("Folder tidak dapat dibuka: " + (e.message || e));
+    }
+}
+
+/* =========================================================
+   POSISI JENDELA
+   ========================================================= */
+
+function centerWindow() {
+
+    try {
+
+        var w = 960;
+        var h = 720;
+
+        window.resizeTo(
+            w,
+            h
+        );
+
+        window.moveTo(
+            Math.max(
+                0,
+                (screen.availWidth - w) / 2
+            ),
+            Math.max(
+                0,
+                (screen.availHeight - h) / 2
+            )
+        );
+
+    }
+    catch (e) {
+    }
+}
+
+
+/* =========================================================
+   SAAT APLIKASI DIBUKA
+   ========================================================= */
+
+window.onload = function () {
+
+    forceMaximized();
+
+    try {
+
+        loadConfig();
+
+        setStatus(
+            "SIAP UNTUK PATCHING",
+            true
+        );
+
+    }
+    catch (e) {
+
+        setStatus(
+            "KONFIGURASI TIDAK DITEMUKAN",
+            false
+        );
+
+        message(
+            "error",
+            e.message || e
+        );
+    }
+};
+
+</script>
+</head>
+
+<body onload="forceMaximized()">
+<div id="screen">
+<img id="bgImage" src="background/background.jpg" alt="">
+<div class="wrap">
+
+<div class="header">
+  <div class="logo">⚙</div>
+  <div class="titlebar">PosPay Patching</div>
+  <div class="min">−</div><div class="max"></div><div class="close">×</div>
+</div>
+
+<div class="main">
+  <div class="brandGear">⚙</div>
+  <div class="kicker">POSPAY SYSTEM</div>
+  <h1>PATCHER <span>APLIKASI</span></h1>
+  <p class="desc">Perbaiki dan Update Aplikasi dengan Mudah</p>
+  <div class="version">Power By Wak Dit&nbsp;&nbsp;|&nbsp;&nbsp;<b>© 2026</b>&nbsp;&nbsp;|&nbsp;&nbsp;<span>KCU BATAM 29400</span></div>
+
+  <div class="card">
+    <div class="flow">
+      <div class="doc left">
+        <div class="fold"></div>
+        <div class="lines"><i></i><i></i><i style="width:26px"></i></div>
+        <div class="badge red">⚒</div>
+      </div>
+      <div class="arrows">›››</div>
+      <div class="doc right">
+        <div class="fold"></div>
+        <div class="lines"><i></i><i></i><i style="width:26px"></i></div>
+        <div class="badge green">✓</div>
+      </div>
+    </div>
+
+    <div class="heroTitle">Siap Melakukan Patch!</div>
+    <div class="heroSub">Klik tombol PATCH untuk memulai proses.</div>
+
+    <button id="btnPatch" class="patch" onclick="patchNow()">⚙ &nbsp; PATCH</button>
+
+    <div id="filePicker">
+      <div class="pickerTitle">PILIH FILE PATCH</div>
+      <div id="pickerFolder" class="pickerSub">Folder sumber</div>
+      <div id="fileList"></div>
+      <div id="pickerButtons">
+        <button class="pickerBtn pickerSelect" onclick="selectAllFiles()">PILIH SEMUA</button>
+        <button class="pickerBtn pickerSelect" onclick="unselectAllFiles()">BATALKAN PILIHAN</button>
+        <button class="pickerBtn pickerCancel" onclick="closeFilePicker()">BATAL</button>
+        <button class="pickerBtn pickerConfirm" onclick="confirmFileSelection()">PATCH FILE TERPILIH</button>
+      </div>
+    </div>
+
+    <div id="patchConfirm">
+      <div class="confirmTitle">KONFIRMASI PATCH FILE TERPILIH</div>
+      <div class="confirmSub">File berikut akan di-patch:</div>
+      <div id="confirmExisting"></div>
+      <div id="confirmList"></div>
+      <div id="confirmButtons">
+        <button class="confirmBtn confirmCancel" onclick="cancelPatchConfirm()">CANCEL</button>
+        <button class="confirmBtn confirmOk" onclick="acceptPatchConfirm()">OK, PATCH</button>
+      </div>
+    </div>
+
+    <button id="btnFolder" class="folder" onclick="openFolder()">BUKA FOLDER HASIL PATCH</button>
+    <div id="message" class="message"></div>
+  </div>
+
+
+  <span id="statusDot"></span>
+  <span id="statusText">SIAP UNTUK PATCHING</span>
+  <span id="fileName">Memuat...</span>
+  <span id="sourcePath">Memuat...</span>
+  <span id="targetPath">Memuat...</span>
+
+  <div class="log">
+    <div class="logTitle">Log Proses</div>
+    <button id="clearLogBtn" class="clear" onclick="clearLog()">▣ &nbsp; Bersihkan Log</button>
+    <div id="logArea" class="logArea"></div>
+  </div>
+</div>
+
+</div>
+</div>
+</body>
+
+</html>
