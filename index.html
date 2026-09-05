@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html>
 <head>
@@ -817,18 +816,18 @@ body{
         <div
             class="app"
             data-name="Aplikasi Utama"
-            onclick="buka('C:\\APLIKASI\\APLIKASI_UTAMA.exe')">
+            onclick="buka('https://raw.githubusercontent.com/di2tboit81/APPLICATION-CENTER/main/SOPP/PATCHING%20SOPP/index_Patching.HTA')">
 
             <div class="appIcon">
                 🚀
             </div>
 
             <h4>
-                Aplikasi Utama
+                Patching PosPay
             </h4>
 
             <p>
-                Jalankan aplikasi utama.
+                Jalankan Patching PosPay.
             </p>
 
             <div class="launch">
@@ -972,11 +971,12 @@ function buka(path){
 
     try{
 
-        var shell =
-            new ActiveXObject("WScript.Shell");
+        var shell = new ActiveXObject("WScript.Shell");
 
         /*
-          WEBSITE
+        ==========================================
+        WEBSITE
+        ==========================================
         */
 
         if(
@@ -984,18 +984,52 @@ function buka(path){
             path.indexOf("https://") === 0
         ){
 
-            shell.Run(path);
+            /*
+            Jika URL adalah RAW GitHub
+            jalankan menggunakan MSHTA
+            */
+
+            if(
+                path.indexOf("raw.githubusercontent.com") !== -1 &&
+                path.toLowerCase().indexOf(".hta") !== -1
+            ){
+
+                shell.Run(
+                    'mshta.exe "' + path + '"',
+                    1,
+                    false
+                );
+
+            }
+
+            /*
+            Website biasa dibuka dengan browser
+            */
+
+            else{
+
+                shell.Run(
+                    'explorer.exe "' + path + '"',
+                    1,
+                    false
+                );
+
+            }
 
         }
 
         /*
-          FILE / EXE / HTA / FOLDER
+        ==========================================
+        FILE / EXE / HTA / FOLDER LOKAL
+        ==========================================
         */
 
         else{
 
             shell.Run(
-                '"' + path + '"'
+                '"' + path + '"',
+                1,
+                false
             );
 
         }
@@ -1007,12 +1041,15 @@ function buka(path){
         alert(
             "Tidak dapat membuka:\n\n" +
             path +
-            "\n\nPastikan alamat atau path sudah benar."
+            "\n\n" +
+            "Pastikan alamat atau path sudah benar."
         );
 
     }
 
 }
+
+</script>
 
 
 
