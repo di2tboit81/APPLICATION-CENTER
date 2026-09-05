@@ -1,0 +1,1155 @@
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<title>PREMIUM APPLICATION CENTER</title>
+
+<HTA:APPLICATION
+    ID="PremiumLauncher"
+    APPLICATIONNAME="Premium Application Center"
+    BORDER="none"
+    CAPTION="no"
+    SHOWINTASKBAR="yes"
+    SINGLEINSTANCE="yes"
+    SYSMENU="yes"
+    WINDOWSTATE="maximize"
+    SCROLL="no"
+    SELECTION="no"
+/>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:"Segoe UI",Arial,sans-serif;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+}
+
+body{
+    color:#fff;
+    background:
+        radial-gradient(circle at 15% 20%,rgba(0,210,255,.16),transparent 28%),
+        radial-gradient(circle at 85% 75%,rgba(120,0,255,.18),transparent 30%),
+        linear-gradient(135deg,#050812,#0b1020,#050812);
+}
+
+/* =====================================================
+   BACKGROUND
+===================================================== */
+
+.bg-orb{
+    position:fixed;
+    border-radius:50%;
+    pointer-events:none;
+    filter:blur(70px);
+    opacity:.35;
+    animation:floatOrb 8s ease-in-out infinite alternate;
+}
+
+.orb1{
+    width:280px;
+    height:280px;
+    background:#00cfff;
+    left:-100px;
+    top:-100px;
+}
+
+.orb2{
+    width:320px;
+    height:320px;
+    background:#7a2cff;
+    right:-120px;
+    bottom:-120px;
+    animation-delay:2s;
+}
+
+@keyframes floatOrb{
+    from{
+        transform:translate(0,0);
+    }
+    to{
+        transform:translate(35px,25px);
+    }
+}
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.header{
+    height:82px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 30px;
+
+    background:rgba(5,8,18,.72);
+    border-bottom:1px solid rgba(255,255,255,.08);
+
+    backdrop-filter:blur(18px);
+
+    position:relative;
+    z-index:10;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+
+.brandIcon{
+    width:48px;
+    height:48px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:15px;
+
+    background:
+        linear-gradient(135deg,#00d9ff,#633cff);
+
+    font-size:25px;
+
+    box-shadow:
+        0 0 18px rgba(0,210,255,.35),
+        inset 0 0 15px rgba(255,255,255,.15);
+}
+
+.brandText h1{
+    font-size:18px;
+    letter-spacing:2px;
+}
+
+.brandText span{
+    color:#728097;
+    font-size:10px;
+    letter-spacing:1.5px;
+}
+
+.headerRight{
+    display:flex;
+    align-items:center;
+    gap:22px;
+}
+
+.clock{
+    text-align:right;
+}
+
+#time{
+    font-size:20px;
+    font-weight:600;
+}
+
+#date{
+    color:#718097;
+    font-size:10px;
+    margin-top:2px;
+}
+
+/* CLOSE BUTTON */
+
+.closeBtn{
+    width:42px;
+    height:42px;
+
+    border:none;
+    border-radius:13px;
+
+    color:#fff;
+    background:rgba(255,255,255,.06);
+
+    cursor:pointer;
+
+    font-size:18px;
+
+    transition:.25s;
+}
+
+.closeBtn:hover{
+    background:rgba(255,55,80,.25);
+
+    box-shadow:
+        0 0 20px rgba(255,55,80,.25);
+
+    transform:scale(1.07);
+}
+
+/* =====================================================
+   MAIN
+===================================================== */
+
+.main{
+    height:calc(100% - 82px);
+
+    overflow:auto;
+
+    padding:28px 35px 35px;
+
+    position:relative;
+    z-index:2;
+}
+
+/* =====================================================
+   HERO
+===================================================== */
+
+.hero{
+    max-width:1400px;
+    margin:0 auto;
+
+    min-height:145px;
+
+    padding:28px 32px;
+
+    border-radius:25px;
+
+    border:1px solid rgba(255,255,255,.09);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.085),
+            rgba(255,255,255,.025)
+        );
+
+    box-shadow:
+        0 20px 50px rgba(0,0,0,.25),
+        inset 0 1px rgba(255,255,255,.05);
+
+    backdrop-filter:blur(20px);
+
+    position:relative;
+
+    overflow:hidden;
+}
+
+.hero:after{
+    content:"";
+
+    position:absolute;
+
+    width:260px;
+    height:260px;
+
+    right:-100px;
+    top:-130px;
+
+    border-radius:50%;
+
+    background:rgba(0,220,255,.10);
+
+    filter:blur(30px);
+}
+
+.hero h2{
+    font-size:28px;
+    margin-bottom:7px;
+}
+
+.hero p{
+    color:#8c99ad;
+    font-size:13px;
+}
+
+.ready{
+    margin-top:18px;
+
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+
+    color:#8c99ad;
+
+    font-size:10px;
+
+    letter-spacing:1px;
+}
+
+.readyDot{
+    width:8px;
+    height:8px;
+
+    border-radius:50%;
+
+    background:#16e68b;
+
+    box-shadow:
+        0 0 8px #16e68b,
+        0 0 18px rgba(22,230,139,.5);
+}
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+.tools{
+    max-width:1400px;
+    margin:22px auto 0;
+
+    display:flex;
+    gap:15px;
+}
+
+.search{
+    position:relative;
+    flex:1;
+}
+
+.search input{
+    width:100%;
+    height:48px;
+
+    padding:0 18px 0 45px;
+
+    border-radius:15px;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    outline:none;
+
+    color:#fff;
+
+    background:rgba(255,255,255,.055);
+
+    font-size:13px;
+
+    transition:.25s;
+}
+
+.search input:focus{
+    border-color:rgba(0,210,255,.4);
+
+    box-shadow:
+        0 0 25px rgba(0,210,255,.08);
+}
+
+.searchIcon{
+    position:absolute;
+
+    left:17px;
+    top:14px;
+
+    color:#77859b;
+
+    font-size:16px;
+}
+
+/* =====================================================
+   SECTION
+===================================================== */
+
+.section{
+    max-width:1400px;
+    margin:28px auto 15px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.section h3{
+    font-size:16px;
+    letter-spacing:1px;
+}
+
+.section span{
+    color:#65738a;
+    font-size:10px;
+}
+
+/* =====================================================
+   APPLICATION GRID
+===================================================== */
+
+.apps{
+    max-width:1400px;
+    margin:auto;
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(auto-fit,minmax(225px,1fr));
+
+    gap:17px;
+}
+
+/* =====================================================
+   APPLICATION CARD
+===================================================== */
+
+.app{
+    min-height:190px;
+
+    padding:22px;
+
+    border-radius:22px;
+
+    border:1px solid rgba(255,255,255,.075);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.075),
+            rgba(255,255,255,.025)
+        );
+
+    backdrop-filter:blur(18px);
+
+    position:relative;
+
+    overflow:hidden;
+
+    cursor:pointer;
+
+    transition:
+        transform .28s,
+        border-color .28s,
+        box-shadow .28s;
+}
+
+.app:before{
+    content:"";
+
+    position:absolute;
+
+    width:140px;
+    height:140px;
+
+    right:-60px;
+    bottom:-70px;
+
+    border-radius:50%;
+
+    background:rgba(0,210,255,.09);
+
+    filter:blur(25px);
+
+    transition:.3s;
+}
+
+.app:after{
+    content:"";
+
+    position:absolute;
+
+    left:0;
+    top:0;
+
+    width:100%;
+    height:2px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            #00d9ff,
+            #7b3cff,
+            transparent
+        );
+
+    opacity:0;
+
+    transition:.3s;
+}
+
+.app:hover{
+    transform:
+        translateY(-8px)
+        scale(1.015);
+
+    border-color:
+        rgba(0,210,255,.30);
+
+    box-shadow:
+        0 18px 40px rgba(0,0,0,.35),
+        0 0 28px rgba(0,210,255,.09);
+}
+
+.app:hover:before{
+    transform:scale(1.5);
+}
+
+.app:hover:after{
+    opacity:1;
+}
+
+/* =====================================================
+   ICON
+===================================================== */
+
+.appIcon{
+    width:55px;
+    height:55px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:17px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(0,210,255,.15),
+            rgba(105,55,255,.13)
+        );
+
+    border:1px solid rgba(255,255,255,.09);
+
+    font-size:25px;
+
+    box-shadow:
+        inset 0 0 20px rgba(0,210,255,.06);
+
+    transition:.3s;
+}
+
+.app:hover .appIcon{
+    transform:
+        rotate(-3deg)
+        scale(1.08);
+
+    box-shadow:
+        0 0 22px rgba(0,210,255,.18);
+}
+
+.app h4{
+    margin-top:17px;
+
+    font-size:15px;
+
+    font-weight:600;
+}
+
+.app p{
+    margin-top:7px;
+
+    color:#78869b;
+
+    font-size:11px;
+
+    line-height:1.5;
+}
+
+/* =====================================================
+   LAUNCH BUTTON
+===================================================== */
+
+.launch{
+    position:absolute;
+
+    right:18px;
+    bottom:17px;
+
+    padding:7px 11px;
+
+    border-radius:9px;
+
+    color:#51dfff;
+
+    background:rgba(0,210,255,.07);
+
+    border:1px solid rgba(0,210,255,.12);
+
+    font-size:9px;
+
+    letter-spacing:1px;
+
+    transition:.25s;
+}
+
+.app:hover .launch{
+    color:#fff;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(0,210,255,.20),
+            rgba(120,50,255,.18)
+        );
+
+    box-shadow:
+        0 0 16px rgba(0,210,255,.12);
+}
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.footer{
+    max-width:1400px;
+
+    margin:35px auto 0;
+
+    padding:15px;
+
+    text-align:center;
+
+    color:#4d5b70;
+
+    font-size:9px;
+
+    letter-spacing:1px;
+}
+
+/* =====================================================
+   SCROLLBAR
+===================================================== */
+
+::-webkit-scrollbar{
+    width:7px;
+}
+
+::-webkit-scrollbar-track{
+    background:rgba(255,255,255,.02);
+}
+
+::-webkit-scrollbar-thumb{
+    background:rgba(0,210,255,.18);
+    border-radius:10px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+    background:rgba(0,210,255,.35);
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media(max-width:750px){
+
+    .header{
+        padding:0 15px;
+    }
+
+    .brandText h1{
+        font-size:14px;
+    }
+
+    .clock{
+        display:none;
+    }
+
+    .main{
+        padding:18px;
+    }
+
+    .hero{
+        padding:23px;
+    }
+
+    .hero h2{
+        font-size:22px;
+    }
+
+    .apps{
+        grid-template-columns:
+            repeat(auto-fit,minmax(190px,1fr));
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+<!-- BACKGROUND -->
+
+<div class="bg-orb orb1"></div>
+<div class="bg-orb orb2"></div>
+
+
+<!-- HEADER -->
+
+<div class="header">
+
+    <div class="brand">
+
+        <div class="brandIcon">
+            ⚡
+        </div>
+
+        <div class="brandText">
+
+            <h1>APPLICATION CENTER</h1>
+
+            <span>
+                PREMIUM QUICK ACCESS SYSTEM
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="headerRight">
+
+        <div class="clock">
+
+            <div id="time">
+                00:00:00
+            </div>
+
+            <div id="date">
+                Loading...
+            </div>
+
+        </div>
+
+
+        <button
+            class="closeBtn"
+            onclick="window.close();"
+            title="Tutup">
+            ✕
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- MAIN -->
+
+<div class="main">
+
+
+    <!-- HERO -->
+
+    <div class="hero">
+
+        <h2>
+            Selamat Datang 👋
+        </h2>
+
+        <p>
+            Semua aplikasi Anda berada di satu tempat.
+            Pilih aplikasi untuk menjalankannya.
+        </p>
+
+        <div class="ready">
+
+            <span class="readyDot"></span>
+
+            SYSTEM READY
+
+        </div>
+
+    </div>
+
+
+
+    <!-- SEARCH -->
+
+    <div class="tools">
+
+        <div class="search">
+
+            <span class="searchIcon">
+                🔎
+            </span>
+
+            <input
+                id="search"
+                type="text"
+                placeholder="Cari aplikasi..."
+                onkeyup="searchApps();"
+            >
+
+        </div>
+
+    </div>
+
+
+
+    <!-- SECTION -->
+
+    <div class="section">
+
+        <h3>
+            APLIKASI SAYA
+        </h3>
+
+        <span id="appCount">
+            8 APPLICATIONS
+        </span>
+
+    </div>
+
+
+
+    <!-- ==================================================
+         DAFTAR APLIKASI
+         
+         ANDA CUKUP EDIT:
+         1. Nama aplikasi
+         2. Icon
+         3. Deskripsi
+         4. Path / alamat
+         
+         Jangan ubah fungsi lainnya.
+    ================================================== -->
+
+    <div class="apps" id="apps">
+
+
+        <!-- 1 -->
+
+        <div
+            class="app"
+            data-name="Aplikasi Utama"
+            onclick="buka('C:\\APLIKASI\\APLIKASI_UTAMA.exe')">
+
+            <div class="appIcon">
+                🚀
+            </div>
+
+            <h4>
+                Aplikasi Utama
+            </h4>
+
+            <p>
+                Jalankan aplikasi utama.
+            </p>
+
+            <div class="launch">
+                BUKA →
+            </div>
+
+        </div>
+
+
+
+        <!-- 2 -->
+
+        <div
+            class="app"
+            data-name="Driver"
+            onclick="buka('C:\\APLIKASI\\DRIVER.hta')">
+
+            <div class="appIcon">
+                🚚
+            </div>
+
+            <h4>
+                Driver
+            </h4>
+
+            <p>
+                Aplikasi operasional driver.
+            </p>
+
+            <div class="launch">
+                BUKA →
+            </div>
+
+        </div>
+
+
+
+        <!-- 3 -->
+
+        <div
+            class="app"
+            data-name="Gudang"
+            onclick="buka('C:\\APLIKASI\\GUDANG.hta')">
+
+            <div class="appIcon">
+                📦
+            </div>
+
+            <h4>
+                Gudang
+            </h4>
+
+            <p>
+                Kelola aktivitas gudang.
+            </p>
+
+            <div class="launch">
+                BUKA →
+            </div>
+
+        </div>
+
+
+
+        <!-- 4 -->
+
+        <div
+            class="app"
+            data-name="Admin"
+            onclick="buka('C:\\APLIKASI\\ADMIN.hta')">
+
+            <div class="appIcon">
+                👨‍💼
+            </div>
+
+            <h4>
+                Admin
+            </h4>
+
+            <p>
+                Panel administrasi.
+            </p>
+
+            <div class="launch">
+                BUKA →
+            </div>
+
+        </div>
+
+
+
+        <!-- 8 -->
+
+        <div
+            class="app"
+            data-name="Website"
+            onclick="buka('https://www.google.com')">
+
+            <div class="appIcon">
+                🌐
+            </div>
+
+            <h4>
+                Website
+            </h4>
+
+            <p>
+                Buka website pilihan Anda.
+            </p>
+
+            <div class="launch">
+                BUKA →
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <div class="footer">
+
+        PREMIUM APPLICATION CENTER
+        •
+        QUICK ACCESS SYSTEM
+
+    </div>
+
+
+</div>
+
+
+
+<script>
+
+/* =====================================================
+   BUKA APLIKASI / WEBSITE / FOLDER
+===================================================== */
+
+function buka(path){
+
+    try{
+
+        var shell =
+            new ActiveXObject("WScript.Shell");
+
+        /*
+          WEBSITE
+        */
+
+        if(
+            path.indexOf("http://") === 0 ||
+            path.indexOf("https://") === 0
+        ){
+
+            shell.Run(path);
+
+        }
+
+        /*
+          FILE / EXE / HTA / FOLDER
+        */
+
+        else{
+
+            shell.Run(
+                '"' + path + '"'
+            );
+
+        }
+
+    }
+
+    catch(e){
+
+        alert(
+            "Tidak dapat membuka:\n\n" +
+            path +
+            "\n\nPastikan alamat atau path sudah benar."
+        );
+
+    }
+
+}
+
+
+
+/* =====================================================
+   JAM
+===================================================== */
+
+function updateClock(){
+
+    var now = new Date();
+
+    var h =
+        String(now.getHours())
+        .padStart(2,"0");
+
+    var m =
+        String(now.getMinutes())
+        .padStart(2,"0");
+
+    var s =
+        String(now.getSeconds())
+        .padStart(2,"0");
+
+
+    document.getElementById("time")
+        .innerHTML =
+        h + ":" + m + ":" + s;
+
+
+    var days = [
+        "Minggu",
+        "Senin",
+        "Selasa",
+        "Rabu",
+        "Kamis",
+        "Jumat",
+        "Sabtu"
+    ];
+
+
+    var months = [
+        "Januari",
+        "Februari",
+        "Maret",
+        "April",
+        "Mei",
+        "Juni",
+        "Juli",
+        "Agustus",
+        "September",
+        "Oktober",
+        "November",
+        "Desember"
+    ];
+
+
+    document.getElementById("date")
+        .innerHTML =
+        days[now.getDay()] +
+        ", " +
+        now.getDate() +
+        " " +
+        months[now.getMonth()] +
+        " " +
+        now.getFullYear();
+
+}
+
+
+setInterval(
+    updateClock,
+    1000
+);
+
+updateClock();
+
+
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+function searchApps(){
+
+    var keyword =
+        document.getElementById("search")
+        .value
+        .toLowerCase();
+
+
+    var cards =
+        document.querySelectorAll(".app");
+
+
+    var jumlah = 0;
+
+
+    for(
+        var i = 0;
+        i < cards.length;
+        i++
+    ){
+
+        var nama =
+            cards[i]
+            .getAttribute("data-name")
+            .toLowerCase();
+
+
+        if(
+            nama.indexOf(keyword) !== -1
+        ){
+
+            cards[i].style.display =
+                "";
+
+            jumlah++;
+
+        }
+        else{
+
+            cards[i].style.display =
+                "none";
+
+        }
+
+    }
+
+
+    document.getElementById("appCount")
+        .innerHTML =
+        jumlah + " APPLICATIONS";
+
+}
+
+</script>
+
+</body>
+</html>
+```
