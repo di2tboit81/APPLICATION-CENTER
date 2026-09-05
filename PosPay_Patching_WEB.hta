@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>PosPay Patching</title>
+<HTA:APPLICATION
+ ID="PosPayPatching"
+ APPLICATIONNAME="PosPay Patching"
+ ICON="pospay.ico"
+ BORDER="thin"
+ CAPTION="yes"
+ MAXIMIZEBUTTON="yes"
+ MINIMIZEBUTTON="yes"
+ SHOWINTASKBAR="yes"
+ SINGLEINSTANCE="yes"
+ SYSMENU="yes"
+ SCROLL="no"
+ WINDOWSTATE="maximized"
+/>
+
+<style>
+html,body{margin:0;padding:0;width:100%;height:100%;font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:#062c52;overflow:hidden}
+*{box-sizing:border-box}
+#screen{position:absolute;left:0;top:0;width:100%;height:100%;background:#062c52;overflow:hidden;}
+#bgImage{position:absolute;left:0;top:0;width:100%;height:100%;z-index:0;display:block;}
+.wrap{position:absolute;left:0;top:0;width:100%;height:100%;overflow:hidden;background:transparent;border:1px solid #8fb9df;border-radius:22px;z-index:1}
+
+/* orange decorative waves */
+.wrap:before{display:none}
+.wrap:after{display:none}
+
+.header{display:none}
+.logo{position:absolute;left:26px;top:12px;color:#ff9a18;font-size:30px;font-weight:bold}
+.titlebar{position:absolute;left:63px;top:16px;color:#fff;font-size:17px;font-weight:600}
+.min{position:absolute;right:100px;top:15px;color:#fff;font-size:20px}
+.max{position:absolute;right:55px;top:15px;width:17px;height:17px;border:2px solid #fff}
+.close{position:absolute;right:18px;top:8px;color:#fff;font-size:28px}
+
+.main{position:absolute;left:0;right:0;top:0;bottom:0;z-index:2}
+.brandGear{position:absolute;left:50%;top:8px;transform:translateX(-50%);color:#ff9b00;font-size:48px;line-height:48px;text-align:center}
+.kicker{display:none}
+h1{position:absolute;left:0;right:0;top:48px;margin:0;color:#fff;font-size:31px;line-height:36px;font-weight:900;text-align:center}
+h1 span{color:#ff861f}
+.desc{position:absolute;left:0;right:0;top:84px;margin:0;color:#dce9f5;font-size:12px;text-align:center}
+.version{position:absolute;left:38px;bottom:145px;width:auto;height:auto;min-width:0;border:2px solid #ff861f;border-radius:999px;color:#fff;text-align:center;font-size:10px;padding:9px 16px;line-height:16px;white-space:nowrap;background:rgba(6,44,82,.82);z-index:4;box-shadow:0 4px 14px rgba(0,0,0,.22)}.version b{font-size:12px;color:#ff861f}.version span{font-size:9px;color:#dce9f5}
+
+.card{border-radius:16px;position:absolute;left:50%;top:140px;width:560px;height:340px;margin-left:-280px;background:#fff;border-radius:22px;box-shadow:0 10px 28px rgba(0,0,0,.28);border:1px solid #d9e4ee}
+.flow{position:absolute;left:50%;top:24px;width:340px;height:115px;margin-left:-170px}
+.doc{position:absolute;top:0;width:61px;height:80px;border:4px solid #12395e;border-radius:10px;background:#fff}
+.doc.left{left:30px}.doc.right{right:30px}
+.fold{position:absolute;right:-4px;top:-4px;width:21px;height:21px;background:#fff;border-left:4px solid #12395e;border-bottom:4px solid #12395e}
+.lines{position:absolute;left:10px;top:27px;width:39px}
+.lines i{display:block;height:4px;background:#12395e;margin-bottom:7px}
+.badge{position:absolute;right:-16px;bottom:-13px;width:34px;height:34px;border-radius:50%;color:#fff;text-align:center;line-height:34px;font-size:18px;font-weight:bold}
+.red{background:#f14b43}.green{background:#2db878}
+.arrows{position:absolute;left:133px;top:26px;color:#ff7a18;font-size:37px;font-weight:900;letter-spacing:-10px}
+.heroTitle{position:absolute;left:0;right:0;top:138px;text-align:center;color:#092e54;font-size:22px;font-weight:900}
+.heroSub{position:absolute;left:0;right:0;top:166px;text-align:center;color:#58708b;font-size:11px}
+.patch{border-radius:18px;position:absolute;left:50%;top:205px;width:270px;height:47px;margin-left:-135px;border:0;border-radius:16px;background:#062e55;color:#fff;font-size:19px;font-weight:900;cursor:pointer}
+.patch:hover{background:#0b416f}
+.patch:disabled{background:#7c8b99;cursor:default}
+.file{display:none}
+#sourcePath,#targetPath,#statusText,#statusDot,#fileName{display:none}
+.folder{border-radius:14px;display:none;position:absolute;left:50%;top:258px;width:210px;height:32px;margin-left:-105px;border:0;border-radius:10px;background:#ff6a00;color:#fff;font-weight:bold}
+.folder.show{display:block}.message{display:none;position:absolute;left:50%;top:294px;width:470px;margin-left:-235px;padding:6px;text-align:center;border-radius:14px;font-size:9px;font-weight:bold}
+.message-success{display:none;background:#eaf8f0;color:#17633f}.message-warn{display:block;background:#fff4e7;color:#89531a}.message-error{display:block;background:#fff0f0;color:#a12f2f}
+
+
+.log{border-radius:22px;position:absolute;left:23px;right:23px;bottom:16px;height:120px;background:#f7fbff;border:1px solid #b8d5ee;border-radius:22px;padding:0}
+.logTitle{position:absolute;left:14px;top:10px;color:#12395e;font-size:12px;font-weight:900}
+.clear{border-radius:14px;position:absolute;right:10px;top:7px;height:27px;padding:0 10px;border:1px solid #b8d5ee;border-radius:12px;background:#fff;color:#173b5f;font-size:9px;font-weight:bold;cursor:pointer}
+.logArea{border-radius:12px;position:absolute;left:10px;right:10px;top:37px;bottom:9px;border:1px solid #c9ddec;border-radius:16px;background:#fff;overflow:auto;padding:5px;font:9px Consolas,monospace;color:#294766;white-space:pre-wrap}
+</style>
+<script language="javascript">
+
+/* =========================================================
+   VARIABEL
+   ========================================================= */
+
+var fso = null;
+var shell = null;
+
+var appDir = "";
+var batPath = "";
+
+var sourceFile = "";
+var targetDir = "";
+var targetFile = "";
+var progressValue = 0;
+
+function forceMaximized(){
+    try {
+        window.moveTo(0,0);
+        window.resizeTo(screen.availWidth, screen.availHeight);
+    } catch(e) {}
+}
+
+function logLine(t) {
+    try {
+        var e = document.getElementById("logArea");
+        if (!e) return;
+        var d = new Date();
+        var hh = ("0" + d.getHours()).slice(-2);
+        var mm = ("0" + d.getMinutes()).slice(-2);
+        var ss = ("0" + d.getSeconds()).slice(-2);
+        e.innerText += "[" + hh + ":" + mm + ":" + ss + "] " + t + "\r\n";
+        e.scrollTop = e.scrollHeight;
+    } catch (x) {}
+}
+
+function setProgress(n) {
+    progressValue = n;
+}
+
+function clearLog() {
+    try {
+        document.getElementById("logArea").innerText = "";
+        setProgress(0);
+        var clearBtn = document.getElementById("clearLogBtn");
+        if (clearBtn) clearBtn.style.display = "none";
+        logLine("Log dibersihkan.");
+    } catch (x) {}
+}
+
+
+
+/* =========================================================
+   MENCARI FOLDER INDEX.HTA
+   ========================================================= */
+
+function hideProgress() {
+}
+
+function showProgress() {
+}
+
+function getAppDir() {
+
+    var p =
+        unescape(window.location.pathname)
+        .replace(/\//g, "\\");
+
+    if (p.charAt(0) == "\\") {
+        p = p.substring(1);
+    }
+
+    var n = p.lastIndexOf("\\");
+
+    if (n >= 0) {
+        return p.substring(0, n);
+    }
+
+    return "";
+}
+
+
+/* =========================================================
+   MEMBACA VARIABLE DARI BAT
+   ========================================================= */
+
+function getVar(txt, name) {
+
+    var re =
+        new RegExp(
+            'set\\s+"' +
+            name +
+            '\\s*=\\s*([^"]*)"',
+            'i'
+        );
+
+    var m = txt.match(re);
+
+    if (m) {
+        return m[1].replace(
+            /^\s+|\s+$/g,
+            ""
+        );
+    }
+
+    return "";
+}
+
+
+/* =========================================================
+   MEMUAT KONFIGURASI
+   ========================================================= */
+
+function loadConfig() {
+
+    fso =
+        new ActiveXObject(
+            "Scripting.FileSystemObject"
+        );
+
+    shell =
+        new ActiveXObject(
+            "WScript.Shell"
+        );
+
+    appDir = getAppDir();
+
+    batPath =
+        fso.BuildPath(
+            appDir,
+            "Download_Patching.bat"
+        );
+
+    if (!fso.FileExists(batPath)) {
+
+        hideProgress();
+        throw new Error(
+            "Download_Patching PosPay tidak ditemukan di folder yang sama dengan PosPay."
+        );
+    }
+
+    var ts =
+        fso.OpenTextFile(
+            batPath,
+            1,
+            false
+        );
+
+    var txt = ts.ReadAll();
+
+    ts.Close();
+
+    sourceFile =
+        getVar(
+            txt,
+            "DOWNLOAD_URL"
+        );
+
+    targetDir =
+        getVar(
+            txt,
+            "TARGET_DIR"
+        );
+
+    targetFile =
+        getVar(
+            txt,
+            "TARGET_FILE"
+        );
+
+    if (!targetFile && sourceFile) {
+
+        targetFile =
+            fso.GetFileName(
+                sourceFile
+            );
+    }
+
+    if (!targetDir && targetFile) {
+
+        targetDir = appDir;
+    }
+
+    document.getElementById(
+        "fileName"
+    ).innerText =
+        targetFile || "Belum diatur";
+
+    document.getElementById(
+        "sourcePath"
+    ).innerText =
+        sourceFile || "Belum diatur";
+
+    document.getElementById(
+        "targetPath"
+    ).innerText =
+        (
+            targetDir &&
+            targetFile
+        )
+        ?
+        fso.BuildPath(
+            targetDir,
+            targetFile
+        )
+        :
+        (
+            targetDir ||
+            "Belum diatur"
+        );
+
+    logLine("Konfigurasi berhasil dibaca.");
+    logLine("Patch file: " + (targetFile || "Belum diatur"));
+    if (targetDir && targetFile) {
+        logLine("Lokasi hasil: " + fso.BuildPath(targetDir, targetFile));
+    }
+
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+function setStatus(t, good) {
+    try {
+        var textEl = document.getElementById("statusText");
+        if (textEl) textEl.innerText = t;
+    } catch (x) {}
+}
+
+
+/* =========================================================
+   PESAN
+   ========================================================= */
+
+function message(cls, t) {
+
+    var e =
+        document.getElementById(
+            "message"
+        );
+
+    if (!e) {
+        logLine(t);
+        return;
+    }
+
+    e.className = "message message-" + cls;
+    e.innerText = t;
+}
+
+
+/* =========================================================
+   PROSES PATCH
+   ========================================================= */
+
+function patchNow() {
+
+    try {
+
+        loadConfig();
+        setProgress(10);
+        logLine("Memulai proses patch...");
+
+        if (!sourceFile) {
+
+            setStatus(
+                "ALAMAT DOWNLOAD TIDAK DITEMUKAN",
+                false
+            );
+
+            message(
+                "error",
+                "Alamat download web tidak ditemukan. Periksa DOWNLOAD_URL di Download_Patching.bat."
+            );
+            logLine("GAGAL: DOWNLOAD_URL tidak ditemukan.");
+            setProgress(0);
+
+            return;
+        }
+
+        logLine("Alamat download web: " + sourceFile);
+        setProgress(20);
+
+        if (
+            !targetDir ||
+            !targetFile
+        ) {
+
+            setStatus(
+                "KONFIGURASI BELUM LENGKAP",
+                false
+            );
+
+            message(
+                "error",
+                "TARGET_DIR atau TARGET_FILE belum diatur."
+            );
+            logLine("GAGAL: TARGET_DIR atau TARGET_FILE belum diatur.");
+            setProgress(0);
+
+            return;
+        }
+
+
+        if (
+            !fso.FolderExists(targetDir)
+        ) {
+
+            fso.CreateFolder(
+                targetDir
+            );
+        }
+
+
+        var dest =
+            fso.BuildPath(
+                targetDir,
+                targetFile
+            );
+
+        logLine("Folder tujuan: " + targetDir);
+        logLine("File hasil akan disimpan di: " + dest);
+        setProgress(30);
+
+
+        if (fso.FileExists(dest)) {
+
+            logLine("File tujuan sudah ada: " + dest);
+
+            if (
+                !confirm(
+                    "FILE SUDAH ADA\n\n" +
+                    targetFile +
+                    "\n\n" +
+                    "Timpa file lama dengan patch terbaru?"
+                )
+            ) {
+
+                setStatus(
+                    "PATCHING DIBATALKAN",
+                    false
+                );
+
+                message(
+                    "warn",
+                    "Patching dibatalkan. File lama tetap aman."
+                );
+                logLine("Patching dibatalkan oleh pengguna.");
+                setProgress(0);
+
+                return;
+            }
+        }
+
+
+        document.getElementById(
+            "btnPatch"
+        ).disabled = true;
+
+
+        setStatus(
+            "SEDANG MEMPROSES PATCH...",
+            false
+        );
+        setProgress(50);
+        logLine("Menjalankan Download_Patching Versi Baru PosPay...");
+        logLine("Mohon tunggu sampai Patching Versi Baru PosPay selesai.");
+
+
+        message(
+            "warn",
+            "Mohon tunggu, proses patch sedang berjalan..."
+        );
+
+
+        shell.Run(
+            '"' + batPath + '"',
+            1,
+            true
+        );
+
+        setProgress(80);
+        logLine("Proses Download_Patching PosPay selesai.");
+        logLine("Memeriksa file hasil di: " + dest);
+
+        if (fso.FileExists(dest)) {
+
+            setStatus(
+                "PATCHING BERHASIL",
+                true
+            );
+
+            message(
+                "success",
+                "PATCH BERHASIL — file sudah berada di folder tujuan."
+            );
+            setProgress(100);
+            logLine("BERHASIL: file ditemukan.");
+            logLine("HASIL DOWNLOAD/PATCH: " + dest);
+
+            var folderBtn = document.getElementById("btnFolder");
+            if (folderBtn) folderBtn.className = "folder show";
+
+        }
+        else {
+
+            setStatus(
+                "PATCHING GAGAL",
+                false
+            );
+
+            message(
+                "error",
+                "Proses selesai tetapi file tujuan belum ditemukan."
+            );
+            setProgress(0);
+            logLine("GAGAL: file tujuan belum ditemukan.");
+            logLine("Seharusnya berada di: " + dest);
+        }
+
+
+        var patchBtn = document.getElementById("btnPatch");
+        if (patchBtn) patchBtn.disabled = false;
+
+    }
+    catch (e) {
+
+        setStatus(
+            "TERJADI KESALAHAN",
+            false
+        );
+
+        message(
+            "error",
+            "Terjadi kesalahan: " +
+            (e.message || e)
+        );
+        setProgress(0);
+        logLine("ERROR: " + (e.message || e));
+
+        var patchBtn = document.getElementById("btnPatch");
+        if (patchBtn) patchBtn.disabled = false;
+    }
+}
+
+
+/* =========================================================
+   BUKA FOLDER
+   ========================================================= */
+
+function openFolder() {
+
+    try {
+
+        loadConfig();
+
+        shell.Run(
+            'explorer.exe "' +
+            targetDir +
+            '"',
+            1,
+            false
+        );
+
+    }
+    catch (e) {
+
+        alert(
+            "Folder tidak dapat dibuka: " +
+            (e.message || e)
+        );
+    }
+}
+
+
+/* =========================================================
+   POSISI JENDELA
+   ========================================================= */
+
+function centerWindow() {
+
+    try {
+
+        var w = 960;
+        var h = 720;
+
+        window.resizeTo(
+            w,
+            h
+        );
+
+        window.moveTo(
+            Math.max(
+                0,
+                (screen.availWidth - w) / 2
+            ),
+            Math.max(
+                0,
+                (screen.availHeight - h) / 2
+            )
+        );
+
+    }
+    catch (e) {
+    }
+}
+
+
+/* =========================================================
+   SAAT APLIKASI DIBUKA
+   ========================================================= */
+
+window.onload = function () {
+
+    forceMaximized();
+
+    try {
+
+        loadConfig();
+
+        setStatus(
+            "SIAP UNTUK PATCHING",
+            true
+        );
+
+    }
+    catch (e) {
+
+        setStatus(
+            "KONFIGURASI TIDAK DITEMUKAN",
+            false
+        );
+
+        message(
+            "error",
+            e.message || e
+        );
+    }
+};
+
+</script>
+</head>
+
+<body onload="forceMaximized()">
+<div id="screen">
+<img id="bgImage" src="background/background.jpg" alt="">
+<div class="wrap">
+
+<div class="header">
+  <div class="logo">⚙</div>
+  <div class="titlebar">PosPay Patching</div>
+  <div class="min">−</div><div class="max"></div><div class="close">×</div>
+</div>
+
+<div class="main">
+  <div class="brandGear">⚙</div>
+  <div class="kicker">POSPAY SYSTEM</div>
+  <h1>PATCHER <span>APLIKASI</span></h1>
+  <p class="desc">Perbaiki dan Update Aplikasi dengan Mudah</p>
+  <div class="version">Power By Wak Dit&nbsp;&nbsp;|&nbsp;&nbsp;<b>© 2026</b>&nbsp;&nbsp;|&nbsp;&nbsp;<span>KCU BATAM 29400</span></div>
+
+  <div class="card">
+    <div class="flow">
+      <div class="doc left">
+        <div class="fold"></div>
+        <div class="lines"><i></i><i></i><i style="width:26px"></i></div>
+        <div class="badge red">⚒</div>
+      </div>
+      <div class="arrows">›››</div>
+      <div class="doc right">
+        <div class="fold"></div>
+        <div class="lines"><i></i><i></i><i style="width:26px"></i></div>
+        <div class="badge green">✓</div>
+      </div>
+    </div>
+
+    <div class="heroTitle">Siap Melakukan Patch!</div>
+    <div class="heroSub">Klik tombol PATCH untuk memulai proses.</div>
+
+    <button id="btnPatch" class="patch" onclick="patchNow()">⚙ &nbsp; PATCH</button>
+    <button id="btnFolder" class="folder" onclick="openFolder()">BUKA FOLDER HASIL PATCH</button>
+    <div id="message" class="message"></div>
+  </div>
+
+
+  <span id="statusDot"></span>
+  <span id="statusText">SIAP UNTUK PATCHING</span>
+  <span id="fileName">Memuat...</span>
+  <span id="sourcePath">Memuat...</span>
+  <span id="targetPath">Memuat...</span>
+
+  <div class="log">
+    <div class="logTitle">Log Proses</div>
+    <button id="clearLogBtn" class="clear" onclick="clearLog()">▣ &nbsp; Bersihkan Log</button>
+    <div id="logArea" class="logArea"></div>
+  </div>
+</div>
+
+</div>
+</div>
+</body>
+
+</html>
